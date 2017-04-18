@@ -58,7 +58,8 @@ def user_user_prediction(sim_matrix, array_data, user_position, item_position):
 
 
 def loading_preparing_data():
-    data = np.genfromtxt('simple.csv', delimiter=',')
+    data = np.genfromtxt('course-certificate.csv', delimiter=',')
+    data = data[1:]
     train_data = data[:(len(data) * 0.8).__int__()]
     test_data = data[(len(data) * 0.8).__int__():]
     n = np.max(data[:, 1])
@@ -72,12 +73,22 @@ def loading_preparing_data():
     array_test_number = [[np.nan for a in range(m.__int__())] for b in range(n.__int__())]
     for i in test_data:
         array_test_number[i[1].__int__() - 1][i[0].__int__() - 1] = i[2]
-    return np.array(array), np.array(array_number), np.array(array_test_number)
+    return np.array(array), np.array(array_number), np.array(test_data)
 
 
-def calculate_rmse(training_dataset, test_dataset,):
-
-    pass
+def calculate_rmse(training_dataset, test_dataset):
+    rmse_nominator_item_item = 0
+    rmse_nominator_user_user = 0
+    for i in test_dataset:
+        # calculation item-based CF and user-based CF.
+        # calculation is going for selected item and user.
+        v1 = item_item_prediction(similarity_matrix_item_item, training_dataset, i[1].__int__()-1, i[0].__int__()-1)
+        v2 = user_user_prediction(similarity_matrix_user_user, training_dataset.transpose(), i[1].__int__()-1, i[0].__int__()-1)
+        rmse_nominator_item_item += (v1-i[2])**2
+        rmse_nominator_user_user += (v2 - i[2]) ** 2
+    rmse_nominator_item_item = np.sqrt(rmse_nominator_item_item / len(test_dataset))
+    rmse_nominator_user_user = np.sqrt(rmse_nominator_user_user / len(test_dataset))
+    return rmse_nominator_item_item, rmse_nominator_user_user
 
 
 def calculate_mean_to_item(data):
@@ -100,8 +111,7 @@ mean_users = calculate_mean_to_users(train_data)
 similarity_matrix_item_item = calculate_similarity(train_data, metrics.pairwise.cosine_similarity)
 similarity_matrix_user_user = calculate_similarity(train_data.transpose(), metrics.pairwise.cosine_similarity)
 
-# calculation item-based CF and user-based CF.
-# calculation is going for selected item and user.
-item_item_prediction(similarity_matrix_item_item, train_data, 0, 4)
-user_user_prediction(similarity_matrix_user_user, all_data.transpose(), 0, 4)
+rmse_u, rmse_i = calculate_rmse(train_data, test_data)
+print(str(rmse_i)+" item-item")
+print(str(rmse_u)+" user-user")
 # prediction(similarity_matrix_item_item, train_data, 0, 4)
