@@ -31,7 +31,7 @@ def item_item_prediction(sim_matrix, array_data, i_position, j_position):
     condition = [np.logical_not(np.isnan(array_data[:, j_position]))]
     choice = [array_data[:, j_position]]
     sd = np.select(condlist=condition, choicelist=choice)
-    sd = np.array([sd[i]-mean_items[i] if sd[i] !=0 else 0 for i in range(len(sd))])
+    sd = np.array([sd[i] - mean_items[i] if sd[i] != 0 else 0 for i in range(len(sd))])
 
     condition_sim = [sim_matrix[i_position] > 0, sim_matrix[i_position] == 1]
     choice_sim = [sim_matrix[i_position], 0]
@@ -41,18 +41,19 @@ def item_item_prediction(sim_matrix, array_data, i_position, j_position):
     result = mean_items[i_position] + numenator / denominator
     return result
 
+
 def user_user_prediction(sim_matrix, array_data, user_position, item_position):
     condition = [np.logical_not(np.isnan(array_data[:, item_position]))]
     choice = [array_data[:, item_position]]
     sd = np.select(condlist=condition, choicelist=choice)
-    sd = np.array([sd[i]-mean_items[i] if sd[i] !=0 else 0 for i in range(len(sd))])
+    sd = np.array([sd[i] - mean_items[i] if sd[i] != 0 else 0 for i in range(len(sd))])
 
     condition_sim = [sim_matrix[user_position] > 0, sim_matrix[user_position] == 1]
     choice_sim = [sim_matrix[user_position], 0]
     sd_sim = np.select(condition_sim, choice_sim)
     numenator = np.dot(sd, sd_sim)
     denominator = np.sum(sd_sim) - 1
-    result = mean_items[user_position] + numenator / denominator
+    result = mean_users[item_position] + numenator / denominator
     return result
 
 
@@ -78,22 +79,28 @@ def calculate_rmse():
     pass
 
 
-def calculate_mean_to_user_cf(data):
+def calculate_mean_to_item(data):
     mean_value = [np.nanmean(i) for i in data]
     return mean_value
 
 
-def calculate_mean_to_item_cf(data):
+def calculate_mean_to_users(data):
     mean_value = [np.nanmean(i) for i in data.transpose()]
     return mean_value
 
 
 all_data, train_data, test_data = loading_preparing_data()
-# print(all_data)
-mean_items = calculate_mean_to_user_cf(train_data)
-mean_users = calculate_mean_to_item_cf(train_data)
-similarity_matrix = calculate_similarity(train_data, metrics.pairwise.cosine_similarity)
 
-#item_item_prediction(similarity_matrix, train_data, 0, 4)
-user_user_prediction(similarity_matrix, train_data, 0, 4)
-prediction(similarity_matrix, train_data, 0, 4)
+# calculation mean value for each user and for each item.
+mean_items = calculate_mean_to_item(train_data)
+mean_users = calculate_mean_to_users(train_data)
+
+# calculation similarity matricies for items and for users
+similarity_matrix_item_item = calculate_similarity(train_data, metrics.pairwise.cosine_similarity)
+similarity_matrix_user_user = calculate_similarity(train_data.transpose(), metrics.pairwise.cosine_similarity)
+
+# calculation item-based CF and user-based CF.
+# calculation is going for selected item and user.
+item_item_prediction(similarity_matrix_item_item, train_data, 0, 4)
+user_user_prediction(similarity_matrix_user_user, train_data.transpose(), 0, 4)
+# prediction(similarity_matrix_item_item, train_data, 0, 4)
