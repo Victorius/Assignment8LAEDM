@@ -43,13 +43,13 @@ def item_item_prediction(sim_matrix, array_data, i_position, j_position):
 
 
 def user_user_prediction(sim_matrix, array_data, user_position, item_position):
-    condition = [np.logical_not(np.isnan(array_data[:, item_position]))]
-    choice = [array_data[:, item_position]]
+    condition = [np.logical_not(np.isnan(array_data[:, user_position]))]
+    choice = [array_data[:, user_position]]
     sd = np.select(condlist=condition, choicelist=choice)
-    sd = np.array([sd[i] - mean_items[i] if sd[i] != 0 else 0 for i in range(len(sd))])
+    sd = np.array([sd[i] - mean_users[i] if sd[i] != 0 else 0 for i in range(len(sd))])
 
-    condition_sim = [sim_matrix[user_position] > 0, sim_matrix[user_position] == 1]
-    choice_sim = [sim_matrix[user_position], 0]
+    condition_sim = [sim_matrix[item_position] > 0, sim_matrix[item_position] == 1]
+    choice_sim = [sim_matrix[item_position], 0]
     sd_sim = np.select(condition_sim, choice_sim)
     numenator = np.dot(sd, sd_sim)
     denominator = np.sum(sd_sim) - 1
@@ -75,7 +75,8 @@ def loading_preparing_data():
     return np.array(array), np.array(array_number), np.array(array_test_number)
 
 
-def calculate_rmse():
+def calculate_rmse(training_dataset, test_dataset,):
+
     pass
 
 
@@ -102,5 +103,5 @@ similarity_matrix_user_user = calculate_similarity(train_data.transpose(), metri
 # calculation item-based CF and user-based CF.
 # calculation is going for selected item and user.
 item_item_prediction(similarity_matrix_item_item, train_data, 0, 4)
-user_user_prediction(similarity_matrix_user_user, train_data.transpose(), 0, 4)
+user_user_prediction(similarity_matrix_user_user, all_data.transpose(), 0, 4)
 # prediction(similarity_matrix_item_item, train_data, 0, 4)
