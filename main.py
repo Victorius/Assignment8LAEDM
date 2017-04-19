@@ -23,9 +23,9 @@ def calculate_similarity(array, similarity_type, used_users):
         result_matrix = np.ones((size,size)) * 0
         for i in range(size):
             user_dictionary[used_users[i]] = i
-            column_i = np.nan_to_num((array[i] - np.nanmean(array[i])))
+            column_i = np.nan_to_num((array[used_users[i]] - np.nanmean(array[used_users[i]])))
             for j in range(i,size):
-                column_j = np.nan_to_num((array[j] - np.nanmean(array[j])))
+                column_j = np.nan_to_num((array[used_users[j]] - np.nanmean(array[used_users[j]])))
                 # calculate the similarity by similarity_type.
                 # f = np.dot(column_i, column_j) / (np.sqrt(np.dot(column_j, column_j)) * np.sqrt(np.dot(column_i, column_i)))
                 value_of_sim = similarity_type(X=column_i, Y=column_j)
